@@ -1,0 +1,73 @@
+<h1>Obter</h1>
+
+<form id="formLivro">
+    <div>
+        <label for="inputId">Id</label>
+        <input type="number" id="inputId" name="id" min="1" required />
+    </div>
+
+    <div>
+        <button type="button" onclick="obter()">Obter</button>
+    </div>
+
+</form>
+
+<div id="divLivro"></div>
+
+<script>
+    function escaparHtml(valor) {
+        return String(valor).replace(/[&<>"']/g, (caractere) => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "\"": "&quot;",
+            "'": "&#39;"
+        })[caractere]);
+    }
+
+    async function obter() {
+        try {
+
+            const id = document.getElementById("inputId").value;
+            if (!id) {
+                alert("Informe um id válido.");
+                return;
+            }
+
+            const response = await fetch(`/api/livro/obter?id=${id}`);
+
+            if (!response.ok) {
+                alert("Erro");
+                return;
+            }
+
+            const livro = await response.json();
+
+            let html = '';
+
+            html += `
+                <div>
+                    <h1>
+                        <img src="/public/images/capa/${livro.id}.jpg" width="50" />
+                        ${escaparHtml(livro.nome)}
+                    </h1>
+                    <p>Id: ${livro.id}</p>
+                    <p>Nome: ${escaparHtml(livro.nome)}</p>
+                    <p>Autor: ${escaparHtml(livro.autor)}</p>
+                    <p>Data de publicação: ${escaparHtml(livro.datapub)}</p>
+                    <p>ISBN: ${escaparHtml(livro.isbn)}</p>
+                    <a href="/edicao?id=${livro.id}">Editar</a>
+                </div>
+            `;
+
+
+            let divLivro = document.getElementById("divLivro");
+
+            divLivro.innerHTML = html;
+
+
+        } catch (ex) {
+            alert("Não foi possível buscar o livro.");
+        }
+    }
+</script>

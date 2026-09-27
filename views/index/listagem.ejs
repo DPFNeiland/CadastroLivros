@@ -1,0 +1,84 @@
+<div>
+	<button type="button" onclick="listar()">Listar</button>
+</div>
+
+<div id="divLivro"></div>
+
+<script>
+	let livrosPorId = new Map();
+
+	function escaparHtml(valor) {
+		return String(valor).replace(/[&<>'"]/g, (caractere) => ({
+			"&": "&amp;",
+			"<": "&lt;",
+			">": "&gt;",
+			"'": "&#39;",
+			"\"": "&quot;"
+		})[caractere]);
+	}
+
+	async function listar() {
+		try {
+			const response = await fetch("/api/livro/listar");
+
+			if (!response.ok) {
+				alert("Erro");
+				return;
+			}
+
+			const lista = await response.json();
+			livrosPorId = new Map(lista.map((livro) => [livro.id, livro]));
+
+			let html = '';
+
+			for (let i = 0; i < lista.length; i++) {
+				let livro = lista[i];
+
+				html += `
+					<div>
+						<h1>
+							<img src="/public/images/capa/${livro.id}.jpg" width="50" />
+							${escaparHtml(livro.nome)}
+						</h1>
+						<p>Id: ${livro.id}</p>
+						<p>Nome: ${escaparHtml(livro.nome)}</p>
+						<p>Autor: ${escaparHtml(livro.autor)}</p>
+						<p>Data de publicação: ${escaparHtml(livro.datapub)}</p>
+						<p>ISBN: ${escaparHtml(livro.isbn)}</p>
+						<a href="/edicao?id=${livro.id}">Editar</a>
+						<button type="button" onclick="excluir(${livro.id})">Excluir</button>
+					</div>
+				`;
+			}
+
+			let divLivro = document.getElementById("divLivro");
+
+			divLivro.innerHTML = html;
+		} catch (ex) {
+			alert("Não foi possível carregar os livros.");
+		}
+	}
+
+	async function excluir(id) {
+		const livro = livrosPorId.get(id);
+		if (!livro || !confirm(`Excluir o livro "${livro.nome}"?`)) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/livro/excluir?id=${id}`, { method: "DELETE" });
+			const resultado = await response.json();
+
+			if (!response.ok) {
+				alert(resultado);
+				return;
+			}
+
+			listar();
+		} catch (ex) {
+			alert("Não foi possível excluir o livro.");
+		}
+	}
+
+	listar();
+</script>

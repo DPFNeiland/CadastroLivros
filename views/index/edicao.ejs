@@ -1,0 +1,77 @@
+<h1>Editar livro</h1>
+
+<form id="formLivro">
+	<input type="hidden" id="inputId" name="id" value="<%= id %>" />
+	<div>
+		<label for="inputNome">Nome do livro</label>
+		<input type="text" id="inputNome" name="nome" maxlength="50" required />
+	</div>
+	<div>
+		<label for="inputAutor">Autor</label>
+		<input type="text" id="inputAutor" name="autor" maxlength="50" required />
+	</div>
+	<div>
+		<label for="inputDataPub">Data de publicação</label>
+		<input type="text" id="inputDataPub" name="datapub" maxlength="50" required />
+	</div>
+	<div>
+		<label for="inputISBN">ISBN</label>
+		<input type="text" id="inputISBN" name="isbn" maxlength="50" required />
+	</div>
+	<div>
+		<label for="inputCapa">Nova capa (opcional)</label>
+		<input type="file" id="inputCapa" name="capa" accept="image/jpeg" />
+	</div>
+	<div>
+		<img id="imagemCapa" src="/public/images/capa/<%= id %>.jpg" width="100" alt="Capa atual do livro" />
+	</div>
+	<div>
+		<button type="button" onclick="editarLivro()">Salvar</button>
+		<a href="/listagem">Cancelar</a>
+	</div>
+</form>
+
+<script>
+	async function carregarLivro() {
+		try {
+			const response = await fetch("/api/livro/obter?id=<%= id %>");
+			const livro = await response.json();
+
+			if (!response.ok) {
+				alert(livro);
+				window.location.href = "/listagem";
+				return;
+			}
+
+			document.getElementById("inputNome").value = livro.nome;
+			document.getElementById("inputAutor").value = livro.autor;
+			document.getElementById("inputDataPub").value = livro.datapub;
+			document.getElementById("inputISBN").value = livro.isbn;
+		} catch (ex) {
+			alert("Não foi possível carregar o livro.");
+		}
+	}
+
+	async function editarLivro() {
+		const formData = new FormData(document.getElementById("formLivro"));
+
+		try {
+			const response = await fetch("/api/livro/editar", {
+				method: "PUT",
+				body: formData
+			});
+			const resultado = await response.json();
+
+			if (!response.ok) {
+				alert(resultado);
+				return;
+			}
+
+			window.location.href = "/listagem";
+		} catch (ex) {
+			alert("Não foi possível salvar as alterações.");
+		}
+	}
+
+	carregarLivro();
+</script>

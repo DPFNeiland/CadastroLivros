@@ -1,0 +1,55 @@
+<form id="formLivro">
+	<div>
+		<label for="inputNome">Nome do Livro</label>
+		<input type="text" id="inputNome" name="nome" maxlength="50" required />
+	</div>
+	<div>
+		<label for="inputAutor">Autor</label>
+		<input type="text" id="inputAutor" name="autor" maxlength="50" required />
+	</div>
+	<div>
+		<label for="inputDataPub">Data de publicação</label>
+		<input type="text" id="inputDataPub" name="datapub" maxlength="50" required />
+	</div>
+	<div>
+		<label for="inputISBN">ISBN</label>
+		<input type="text" id="inputISBN" name="isbn" maxlength="50" required />
+	</div>
+	<div>
+		<label for="inputCapa">Capa</label>
+		<input type="file" id="inputCapa" name="capa" accept="image/jpeg" required />
+	</div>
+	<div>
+		<button type="button" onclick="criarLivro()">Criar</button>
+	</div>
+</form>
+
+<script>
+	async function criarLivro() {
+
+		// Aqui vão as validações normais, como vimos antes... 😊
+
+		// As diferenças em relação aos semestres anteriores...
+
+		let formLivro = document.getElementById("formLivro");
+		let formData = new FormData(formLivro);
+
+		try {
+			const response = await fetch("/api/livro/criar", {
+				method: "POST",
+				body: formData
+			});
+
+			const resultado = await response.json();
+
+			if (!response.ok) {
+				alert(resultado);
+				return;
+			}
+
+			window.location.href = "/edicao?id=" + resultado.id;
+		} catch (ex) {
+			alert("Não foi possível criar o livro.");
+		}
+	}
+</script>
